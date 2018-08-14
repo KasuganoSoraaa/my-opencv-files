@@ -39,10 +39,15 @@ Mat contour_correction(string img_name)
 	cout << contours.size() << endl;
 	for (int i = 0; i < contours.size(); i++)
 	{
-		CvPoint2D32f rectpoint[4];
+		CvPoint2D32f rectpoint[4];  //逆时针0123？
 		CvBox2D rect = minAreaRect(Mat(contours[i]));
 
-		cvBoxPoints(rect, rectpoint);
+		/*一个box包括：
+		CvPoint2D32f center; 
+		CvSize2D32f  size;   
+		float angle;*/
+
+		cvBoxPoints(rect, rectpoint); //计算盒子定点
 		float angle = rect.angle;
 		cout << angle << endl;
 
@@ -61,14 +66,14 @@ Mat contour_correction(string img_name)
 		Mat ROIsrcimg(srcimg.rows, srcimg.cols, CV_8UC3);
 		ROIsrcimg.setTo(0);
 		drawContours(bnrimg, contours, -1, Scalar(255), CV_FILLED);
-		srcimg.copyTo(ROIsrcimg, bnrimg);
+		srcimg.copyTo(ROIsrcimg, bnrimg);//掩模
 		/*namedWindow("ROIsrcimg", 1);
 		imshow("RoiSrcImg", ROIsrcimg);*/
-		Mat Ratationedimg(ROIsrcimg.rows, ROIsrcimg.cols, CV_8UC1);
+		Mat Ratationedimg(ROIsrcimg.rows, ROIsrcimg.cols, CV_8UC1);//单通道灰度图
 		Ratationedimg.setTo(0);
 		Point2f center = rect.center;
-		Mat M2 = getRotationMatrix2D(center, angle, 1);
-		warpAffine(ROIsrcimg, Ratationedimg, M2, ROIsrcimg.size(), 1, 0, Scalar(0));
+		Mat M2 = getRotationMatrix2D(center, angle, 1);//旋转矩阵
+		warpAffine(ROIsrcimg, Ratationedimg, M2, ROIsrcimg.size(), 1, 0, Scalar(0));//仿射变换
 		/*imshow("旋转之后", RatationedImg);*/
 		dstimg = Ratationedimg;
 	}
@@ -77,7 +82,6 @@ Mat contour_correction(string img_name)
 }
 int main()
 {
-
 	Mat asd = contour_correction("rmb.png"), asf;
 	asf = ROI_process(asd);
 	return 0;
